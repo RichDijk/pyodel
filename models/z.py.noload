@@ -1,0 +1,88 @@
+# -*- coding: utf-8 -*-
+
+def show_markmin(value, row):
+    if request.function == "select" and request.args(1) is None:
+        # grids
+        if value is not None:
+            return value[:20]
+        else:
+            return value
+    else:
+        # forms
+        return MARKMIN(value)
+
+def show_documents(value, row):
+    if value is not None:
+        return OL(*[LI(A(item.title,
+                         _href=URL(r=request,
+                                   c="plugin_wiki",
+                                   f="page",
+                                   args=[item.slug,
+                                   ]))) for item in value])
+    else:
+        return T("Empty")
+
+# custom validators (to be declared after plugin_wiki)
+
+db.course.documents.requires = IS_IN_DB(db, db.plugin_wiki_page, "%(slug)s",
+                                        multiple=True)
+db.course.documents.represent = show_documents
+db.course.body.represent = show_markmin
+
+db.lecture.documents.requires = IS_IN_DB(db, db.plugin_wiki_page, "%(slug)s",
+                                         multiple=True)
+db.lecture.documents.represent = show_documents
+db.lecture.body.represent = show_markmin
+
+db.task.documents.requires = IS_IN_DB(db, db.plugin_wiki_page, "%(slug)s",
+                                      multiple=True)
+db.task.documents.represent = show_documents
+db.task.body.represent = show_markmin
+
+db.work.documents.requires = IS_IN_DB(db, db.plugin_wiki_page, "%(slug)s",
+                                      multiple=True)
+db.work.documents.represent = show_documents
+db.work.body.represent = show_markmin
+
+db.stream.body.represent = show_markmin
+db.answer.body.represent = show_markmin
+db.question.body.represent = show_markmin
+db.quiz.body.represent = show_markmin
+db.retort.body.represent = show_markmin
+
+db.plugin_wiki_page.body.comment = markmin_comment
+
+
+########################################
+
+# http://codereview.stackexchange.com/questions/5091/
+# python-function-to-convert-roman-numerals-to-integers
+# -and-vice-versa
+
+def int_to_roman (integer):
+    returnstring=''
+    table=[['M',1000],['CM',900],['D',500],['CD',400],['C',100],
+           ['XC',90],['L',50],['XL',40],['X',10],['IX',9],
+           ['V',5],['IV',4],['I',1]]
+
+    for pair in table:
+        while integer-pair[1]>=0:
+            integer-=pair[1]
+            returnstring+=pair[0]
+    return returnstring
+
+def rom_to_int(string):
+    table=[['M',1000],['CM',900],['D',500],['CD',400],['C',100],
+           ['XC',90],['L',50],['XL',40],['X',10],['IX',9],
+           ['V',5],['IV',4],['I',1]]
+    returnint=0
+    for pair in table:
+        continueyes=True
+        while continueyes:
+            if len(string)>=len(pair[0]):
+                if string[0:len(pair[0])]==pair[0]:
+                    returnint+=pair[1]
+                    string=string[len(pair[0]):]
+                else: continueyes=False
+            else: continueyes=False
+    return returnint
