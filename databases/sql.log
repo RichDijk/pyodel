@@ -1,0 +1,299 @@
+timestamp: 2015-12-09T22:16:55.981000
+CREATE TABLE auth_user(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    first_name CHAR(128),
+    last_name CHAR(128),
+    email CHAR(512),
+    password CHAR(512),
+    registration_key CHAR(512),
+    reset_password_key CHAR(512),
+    registration_id CHAR(512)
+);
+success!
+timestamp: 2015-12-09T22:16:56.134000
+CREATE TABLE auth_group(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    role CHAR(512),
+    description TEXT
+);
+success!
+timestamp: 2015-12-09T22:16:56.358000
+CREATE TABLE auth_membership(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER REFERENCES auth_user (id) ON DELETE CASCADE,
+    group_id INTEGER REFERENCES auth_group (id) ON DELETE CASCADE
+);
+success!
+timestamp: 2015-12-09T22:16:56.470000
+CREATE TABLE auth_permission(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    group_id INTEGER REFERENCES auth_group (id) ON DELETE CASCADE,
+    name CHAR(512),
+    table_name CHAR(512),
+    record_id INTEGER
+);
+success!
+timestamp: 2015-12-09T22:16:56.623000
+CREATE TABLE auth_event(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    time_stamp TIMESTAMP,
+    client_ip CHAR(512),
+    user_id INTEGER REFERENCES auth_user (id) ON DELETE CASCADE,
+    origin CHAR(512),
+    description TEXT
+);
+success!
+timestamp: 2015-12-09T22:16:56.830000
+CREATE TABLE auth_cas(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER REFERENCES auth_user (id) ON DELETE CASCADE,
+    created_on TIMESTAMP,
+    service CHAR(512),
+    ticket CHAR(512),
+    renew CHAR(1)
+);
+success!
+timestamp: 2015-12-09T22:16:57.024000
+CREATE TABLE stream(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    live CHAR(1),
+    name CHAR(512),
+    body TEXT,
+    html TEXT,
+    starts TIMESTAMP,
+    ends TIMESTAMP,
+    tags TEXT
+);
+success!
+timestamp: 2015-12-09T22:16:57.219000
+CREATE TABLE course(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    active CHAR(1),
+    template CHAR(1),
+    code CHAR(512),
+    name CHAR(512),
+    streams TEXT,
+    body TEXT,
+    by TEXT,
+    starts TIMESTAMP,
+    documents TEXT,
+    ends TIMESTAMP,
+    tags TEXT,
+    cost DOUBLE
+);
+success!
+timestamp: 2015-12-09T22:16:57.312000
+CREATE TABLE lecture(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    template CHAR(1),
+    chapter INTEGER,
+    name CHAR(512),
+    course INTEGER REFERENCES course (id) ON DELETE CASCADE,
+    streams TEXT,
+    body TEXT,
+    by TEXT,
+    documents TEXT,
+    tags TEXT
+);
+success!
+timestamp: 2015-12-09T22:16:57.392000
+CREATE TABLE attendance(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student INTEGER REFERENCES auth_user (id) ON DELETE CASCADE,
+    course INTEGER REFERENCES course (id) ON DELETE CASCADE,
+    paid DOUBLE,
+    allowed CHAR(1),
+    passed CHAR(512),
+    score DOUBLE
+);
+success!
+timestamp: 2015-12-09T22:16:57.551000
+CREATE TABLE task(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    template CHAR(1),
+    name CHAR(512),
+    body TEXT,
+    documents TEXT,
+    tags TEXT,
+    points DOUBLE
+);
+success!
+timestamp: 2015-12-09T22:16:57.654000
+CREATE TABLE answer(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    body TEXT,
+    tags TEXT
+);
+success!
+timestamp: 2015-12-09T22:16:57.739000
+CREATE TABLE question(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    body TEXT,
+    tags TEXT,
+    points DOUBLE,
+    answers TEXT,
+    correct TEXT,
+    shuffle CHAR(1)
+);
+success!
+timestamp: 2015-12-09T22:16:57.913000
+CREATE TABLE quiz(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    template CHAR(1),
+    duration TIME,
+    questions TEXT,
+    name CHAR(512),
+    body TEXT,
+    tags TEXT,
+    shuffle CHAR(1)
+);
+success!
+timestamp: 2015-12-09T22:16:58.079000
+CREATE TABLE evaluation(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    template CHAR(1),
+    name CHAR(512),
+    code CHAR(512),
+    description TEXT,
+    course INTEGER REFERENCES course (id) ON DELETE CASCADE,
+    lectures TEXT,
+    starts TIMESTAMP,
+    ends TIMESTAMP,
+    students TEXT,
+    evaluators TEXT,
+    quizes TEXT,
+    score DOUBLE,
+    tags TEXT,
+    tasks TEXT
+);
+success!
+timestamp: 2015-12-09T22:16:58.165000
+CREATE TABLE work(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    body TEXT,
+    task INTEGER REFERENCES task (id) ON DELETE CASCADE,
+    starts TIMESTAMP,
+    ends TIMESTAMP,
+    evaluation INTEGER REFERENCES evaluation (id) ON DELETE CASCADE,
+    documents TEXT,
+    points DOUBLE,
+    score DOUBLE
+);
+success!
+timestamp: 2015-12-09T22:16:58.255000
+CREATE TABLE hourglass(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    quiz INTEGER REFERENCES quiz (id) ON DELETE CASCADE,
+    starts TIMESTAMP,
+    ends TIMESTAMP,
+    evaluation INTEGER REFERENCES evaluation (id) ON DELETE CASCADE,
+    score DOUBLE
+);
+success!
+timestamp: 2015-12-09T22:16:58.363000
+CREATE TABLE retort(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    hourglass INTEGER REFERENCES hourglass (id) ON DELETE CASCADE,
+    question INTEGER REFERENCES question (id) ON DELETE CASCADE,
+    answers TEXT,
+    body TEXT,
+    score DOUBLE
+);
+success!
+timestamp: 2015-12-09T22:16:58.499000
+CREATE TABLE plugin_wiki_page(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    slug CHAR(512),
+    title CHAR(512),
+    is_public CHAR(1),
+    body TEXT,
+    role INTEGER REFERENCES auth_group (id) ON DELETE CASCADE,
+    changelog CHAR(512),
+    is_active CHAR(1),
+    created_on TIMESTAMP,
+    created_by INTEGER REFERENCES auth_user (id) ON DELETE CASCADE,
+    modified_on TIMESTAMP,
+    modified_by INTEGER REFERENCES auth_user (id) ON DELETE CASCADE
+);
+success!
+timestamp: 2015-12-09T22:16:58.587000
+CREATE TABLE plugin_wiki_page_archive(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    current_record INTEGER REFERENCES plugin_wiki_page (id) ON DELETE CASCADE,
+    slug CHAR(512),
+    title CHAR(512),
+    is_public CHAR(1),
+    body TEXT,
+    role INTEGER REFERENCES auth_group (id) ON DELETE CASCADE,
+    changelog CHAR(512),
+    is_active CHAR(1),
+    created_on TIMESTAMP,
+    created_by INTEGER REFERENCES auth_user (id) ON DELETE CASCADE,
+    modified_on TIMESTAMP,
+    modified_by INTEGER REFERENCES auth_user (id) ON DELETE CASCADE
+);
+success!
+timestamp: 2015-12-09T22:16:58.669000
+CREATE TABLE plugin_wiki_attachment(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tablename CHAR(512),
+    record_id INTEGER,
+    name CHAR(512),
+    filename CHAR(512),
+    is_active CHAR(1),
+    created_on TIMESTAMP,
+    created_by INTEGER REFERENCES auth_user (id) ON DELETE CASCADE,
+    modified_on TIMESTAMP,
+    modified_by INTEGER REFERENCES auth_user (id) ON DELETE CASCADE
+);
+success!
+timestamp: 2015-12-09T22:16:58.741000
+CREATE TABLE plugin_wiki_comment(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tablename CHAR(512),
+    record_id INTEGER,
+    body CHAR(512),
+    is_active CHAR(1),
+    created_on TIMESTAMP,
+    created_by INTEGER REFERENCES auth_user (id) ON DELETE CASCADE,
+    modified_on TIMESTAMP,
+    modified_by INTEGER REFERENCES auth_user (id) ON DELETE CASCADE
+);
+success!
+timestamp: 2015-12-09T22:16:58.833000
+CREATE TABLE plugin_wiki_tag(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name CHAR(512),
+    links INTEGER,
+    is_active CHAR(1),
+    created_on TIMESTAMP,
+    created_by INTEGER REFERENCES auth_user (id) ON DELETE CASCADE,
+    modified_on TIMESTAMP,
+    modified_by INTEGER REFERENCES auth_user (id) ON DELETE CASCADE
+);
+success!
+timestamp: 2015-12-09T22:16:58.917000
+CREATE TABLE plugin_wiki_link(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tag INTEGER REFERENCES plugin_wiki_tag (id) ON DELETE CASCADE,
+    table_name CHAR(512),
+    record_id INTEGER
+);
+success!
+timestamp: 2015-12-09T22:16:58.998000
+CREATE TABLE plugin_wiki_rating(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tablename CHAR(512),
+    record_id INTEGER,
+    rating DOUBLE,
+    counter INTEGER
+);
+success!
+timestamp: 2015-12-09T22:16:59.089000
+CREATE TABLE plugin_wiki_rating_aux(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    master INTEGER REFERENCES plugin_wiki_rating (id) ON DELETE CASCADE,
+    rating DOUBLE,
+    created_by INTEGER REFERENCES auth_user (id) ON DELETE CASCADE
+);
+success!
